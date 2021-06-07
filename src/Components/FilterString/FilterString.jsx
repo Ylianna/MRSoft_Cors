@@ -1,10 +1,11 @@
-import style from "./FilterString.module.css"
+import React from "react";
+import style from "./FilterString.module.css";
 import {useEffect, useState} from "react";
-import React from "react"
+import * as axios from "axios";
 
 const FilterString = React.memo(() => {
     const [data, setData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
+    const [filterData, setFilterData] = useState([]);
     const [inputData, setInputData] = useState('');
     const [checkboxValue, setCheckboxValue] = useState('i');
 
@@ -16,10 +17,10 @@ const FilterString = React.memo(() => {
         const inputValue = event.target.value;
 
         setInputData(inputValue);
-        checkboxValue === 'i' ? setInputData(inputValue.toLowerCase()) : setInputData(inputValue.toUpperCase());
+        checkboxValue === 'i' ? setInputData(inputValue) : setInputData(inputValue);
     };
 
-    const toggleButtonWordLength = () => {
+    const buttonWordLength = () => {
 
         if (inputData.length >= 1 && !+isNaN(inputData)) {
             const result = data.filter(word => word.length > inputData);
@@ -28,10 +29,10 @@ const FilterString = React.memo(() => {
                 const regExpUpperCase = new RegExp(/([A-Z])\w+/g);
                 const resultUpperCase = result.filter(item => regExpUpperCase.test(item));
 
-                setFilteredData(resultUpperCase);
+                setFilterData(resultUpperCase);
 
             } else if ((checkboxValue === 'i')) {
-                setFilteredData(result);
+                setFilterData(result);
             }
         } else {
             if (!inputData.length || +isNaN(inputData)) {
@@ -40,12 +41,12 @@ const FilterString = React.memo(() => {
         }
     };
 
-    const toggleButtonSubstring = () => {
+    const ButtonSubstring = () => {
         if (inputData.length >= 1 && isNaN(inputData)) {
             const regExp = new RegExp(inputData, `${checkboxValue}`);
             const searchResult = data.filter(word => regExp.test(word));
 
-            setFilteredData(searchResult);
+            setFilterData(searchResult);
         } else {
             if (!isNaN(inputData)) {
                 alert('Введите буквы');
@@ -55,16 +56,13 @@ const FilterString = React.memo(() => {
 
     const toggleCheckbox = () => {
         checkboxValue === 'i' ? setCheckboxValue('') : setCheckboxValue('i');
-        checkboxValue === '' ? setInputData(inputData.toLowerCase()) : setInputData(inputData.toUpperCase());
+        checkboxValue === '' ? setInputData(inputData) : setInputData(inputData);
     };
 
     useEffect(() => {
-        fetch(`${'https://cors-anywhere.herokuapp.com'}/${url}`)
-            .then(response => response.json())
-            .then(
-                (data) => {
-                    setData(data.data);
-                })
+        axios.get(`https://cors-anywhere.herokuapp.com/${url}`).then(data => {
+            setData(data.data.data);
+        })
             .catch(error => {
                 console.error("Error:", error);
             });
@@ -101,11 +99,11 @@ const FilterString = React.memo(() => {
                         <div>
                             <button
                                 className={style.button}
-                                onClick={toggleButtonWordLength}
+                                onClick={buttonWordLength}
                             >По длине слов
                             </button>
                             <button className={style.button}
-                                    onClick={toggleButtonSubstring}
+                                    onClick={ButtonSubstring}
                             >По подстроке
                             </button>
                         </div>
@@ -113,13 +111,13 @@ const FilterString = React.memo(() => {
                 </div>
             </div>
 
-            {filteredData.length > 0 &&
+            {filterData.length > 0 &&
             <div>
                 <h4>Результат:</h4>
 
                 <div className={style.listData}>
                     <ol>
-                        {filteredData.map((item) =>
+                        {filterData.map((item) =>
                             <li key={item} className="flow-text">{item}</li>
                         )
                         }
